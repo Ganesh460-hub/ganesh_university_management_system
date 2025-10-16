@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - UMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .fee-summary {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .payment-form {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #card-element {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fafafa;
+            margin-bottom: 20px;
+        }
+        #card-errors {
+            color: #dc3545;
+            margin-bottom: 15px;
+            min-height: 20px;
+            font-size: 14px;
+        }
+        #submit-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+        }
+        #payment-processing {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f6df5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .payment-success {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .payment-failed {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .amount-input-group {
+            position: relative;
+        }
+        .dollar-sign {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: #6c757d;
+        }
+        .amount-input {
+            padding-left: 25px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">University Management System</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/student/dashboard}">Dashboard</a>
+            <a class="nav-link" th:href="@{/student/fees}">Fees</a>
+            <a class="nav-link active" href="#">Payment</a>
+            <a class="nav-link" th:href="@{/logout}">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="payment-container">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Payment for Semester <span th:text="${semester}"></span></h4>
+            </div>
+
+            <div class="card-body">
+                <!-- Fee Summary -->
+                <div class="fee-summary">
+                    <h5>Fee Summary</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Student:</strong> <span th:text="${student.name}"></span></p>
+                            <p><strong>Student ID:</strong> <span th:text="${student.collegeId}"></span></p>
+                            <p><strong>Department:</strong> <span th:text="${student.department}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Total Fee:</strong> $<span th:text="${#numbers.formatDecimal(studentFee.totalFee, 1, 2)}"></span></p>
+                            <p><strong>Paid Amount:</strong> $<span th:text="${#numbers.formatDecimal(studentFee.paidAmount, 1, 2)}"></span></p>
+                            <p><strong style="color: #e74c3c;">Due Amount:</strong>
+                                <span style="color: #e74c3c; font-weight: bold;">
+                                   $<span th:text="${#numbers.formatDecimal(studentFee.dueAmount, 1, 2)}"></span>
+                               </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <div class="payment-form">
+                    <h5 class="mb-4">Payment Information</h5>
+
+                    <form id="payment-form">
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Payment Amount</label>
+                            <div class="amount-input-group">
+                                <span class="dollar-sign">$</span>
+                                <input type="number" class="form-control amount-input" id="amount"
+                                       th:attr="max=${studentFee.dueAmount}"
+                                       th:value="${studentFee.dueAmount}"
+                                       step="0.01" min="1" required>
+                            </div>
+                            <div class="form-text">You can pay any amount up to $<span th:text="${#numbers.formatDecimal(studentFee.dueAmount, 1, 2)}"></span></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Card Details</label>
+                            <div id="card-element">
+                                <!-- Stripe Card Element will be inserted here -->
+                            </div>
+                            <div id="card-errors" role="alert"></div>
+                        </div>
+
+                        <button type="submit" id="submit-button" class="btn btn-primary btn-lg">
+                            Pay $<span id="pay-amount" th:text="${#numbers.formatDecimal(studentFee.dueAmount, 1, 2)}"></span>
+                        </button>
+
+                        <div id="payment-processing">
+                            <div class="spinner"></div>
+                            <p>Processing your payment...</p>
+                        </div>
+                    </form>
+
+                    <div id="payment-success" class="payment-success">
+                        <strong>Payment successful!</strong>
+                        <p>Your payment has been processed. You will receive a confirmation email shortly.</p>
+                        <a th:href="@{/student/fees}" class="btn btn-success">Back to Fees</a>
+                    </div>
+
+                    <div id="payment-failed" class="payment-failed">
+                        <strong>Payment failed!</strong>
+                        <p id="failure-message">There was an error processing your payment. Please try again.</p>
+                        <button id="retry-button" class="btn btn-warning">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a th:href="@{/student/fees}" class="btn btn-secondary">← Back to Fees</a>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const stripePublicKey = /*[[${stripePublicKey}]]*/ 'pk_test_your_key';
+    const semester = /*[[${semester}]]*/ 1;
+    const studentId = /*[[${student.collegeId}]]*/ '5001';
+    const studentName = /*[[${student.name}]]*/ 'John Doe';
+    const dueAmount = /*[[${studentFee.dueAmount}]]*/ 1000.00;
+    /*]]>*/
+</script>
+
+<script>
+    // Initialize Stripe
+    const stripe = Stripe(stripePublicKey);
+    const elements = stripe.elements();
+
+    // Create card element
+    const cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '16px',
+                color: '#32325d',
+                '::placeholder': {
+                    color: '#aab7c4'
+                }
+            }
+        }
+    });
+
+    cardElement.mount('#card-element');
+
+    // Handle real-time validation errors from the Card Element
+    cardElement.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+
+    // Update pay button when amount changes
+    document.getElementById('amount').addEventListener('input', function(e) {
+        const amount = e.target.value;
+        document.getElementById('pay-amount').textContent = parseFloat(amount).toFixed(2);
+    });
+
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    const submitButton = document.getElementById('submit-button');
+    const paymentProcessing = document.getElementById('payment-processing');
+    const paymentFailed = document.getElementById('payment-failed');
+    const failureMessage = document.getElementById('failure-message');
+    const retryButton = document.getElementById('retry-button');
+
+    // Retry button handler
+    retryButton.addEventListener('click', function() {
+        paymentFailed.style.display = 'none';
+        form.style.display = 'block';
+        submitButton.disabled = false;
+    });
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const amountInput = document.getElementById('amount').value;
+        const amount = parseFloat(amountInput);
+
+        // Validate amount
+        if (isNaN(amount) || amount <= 0 || amount > dueAmount) {
+            alert('Please enter a valid amount between $1 and $' + dueAmount.toFixed(2));
+            return;
+        }
+
+        console.log('Starting payment process...');
+        console.log('Amount:', amount);
+        console.log('Student ID:', studentId);
+
+
+        // Disable form and show processing
+        submitButton.disabled = true;
+        paymentProcessing.style.display = 'block';
+        document.getElementById('card-errors').textContent = '';
+
+        try {
+            // Create payment intent on server
+            const response = await fetch('/student/fees/create-payment-intent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: Math.round(amount * 100), // Convert to cents
+                    semester: semester,
+                    studentId: studentId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            console.log('Payment Intent Response:', data);
+
+            if (data.status === 'error') {
+                throw new Error(data.error || 'Payment failed. Please try again.');
+            }
+
+            if (!data.clientSecret) {
+                throw new Error('Invalid response from server. Please try again.');
+            }
+
+            // Confirm payment with Stripe
+            const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: studentName,
+                    },
+                }
+            });
+
+            console.log('Stripe Payment Result:', { error, paymentIntent });
+
+            if (error) {
+                // Handle specific Stripe errors
+                if (error.type === 'card_error' || error.type === 'validation_error') {
+                    throw new Error(error.message);
+                } else {
+                    throw new Error('An unexpected error occurred. Please try again.');
+                }
+            }
+
+            if (paymentIntent.status === 'succeeded') {
+                // Send success to server
+                const successResponse = await fetch('/student/fees/payment-success', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        paymentIntentId: paymentIntent.id,
+                        semester: semester,
+                        amount: amount,
+                        studentId: studentId
+                    })
+                });
+
+                const successData = await successResponse.json();
+
+                console.log('Payment Success Response:', successData);
+
+                if (successData.status === 'success') {
+                    // Show success message
+                    form.style.display = 'none';
+                    paymentProcessing.style.display = 'none';
+                    document.getElementById('payment-success').style.display = 'block';
+
+                    // Update the success message with transaction ID
+                    if (successData.transactionId) {
+                        document.querySelector('#payment-success p').innerHTML =
+                            'Your payment has been processed successfully!<br>' +
+                            'Transaction ID: <strong>' + successData.transactionId + '</strong><br>' +
+                            'You will receive a confirmation email shortly.';
+                    }
+                } else {
+                    throw new Error(successData.message || 'Payment verification failed.');
+                }
+            } else {
+                throw new Error('Payment was not successful. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Payment error:', error);
+
+            // Show error message to user
+            failureMessage.textContent = error.message || 'Payment failed. Please check your card details and try again.';
+            paymentProcessing.style.display = 'none';
+            form.style.display = 'none';
+            paymentFailed.style.display = 'block';
+        }
+    });
+
+    // Format amount input on blur
+    document.getElementById('amount').addEventListener('blur', function(e) {
+        const value = parseFloat(e.target.value);
+        if (!isNaN(value)) {
+            e.target.value = value.toFixed(2);
+            document.getElementById('pay-amount').textContent = value.toFixed(2);
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

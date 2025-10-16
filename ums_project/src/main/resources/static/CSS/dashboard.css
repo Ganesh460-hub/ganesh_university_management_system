@@ -1,0 +1,99 @@
+/* Profile photo hover effect */
+img.profile-clickable {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+img.profile-clickable:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.fab-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between button and options if expanded */
+    margin-bottom: 15px;
+}
+
+.fab-main {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #3f87a6;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.fab-options {
+    display: none;
+    flex-direction: column;
+    margin-top: 5px;
+}
+
+.fab-options.show {
+    display: flex;
+}
+
+.fab-options a {
+    display: block;
+    margin-bottom: 5px;
+    background-color: #3f87a6;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: transform 0.2s;
+}
+
+.fab-options a:hover {
+    transform: translateY(-2px);
+}
+/* Attendance chart sizing */
+.attendance-container {
+    max-width: 800px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.attendance-title {
+    margin-bottom: 10px; /* reduce space above the chart */
+    font-size: 24px;
+}
+
+.chart-wrapper {
+    position: relative;
+    margin-bottom: 10px; /* reduce space below the chart */
+}
+
+#attendanceChart {
+    height: 350px; /* smaller height makes it closer to titles */
+    max-width: 100%;
+}
+
+.overall-attendance {
+    margin-top: 5px; /* less space above overall attendance */
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Fix graph width and add colors */
+.attendance-container {
+    max-width: 500px; /* Reduced from 800px */
+    margin: 20px auto;
+}
+
+#attendanceChart {
+    height: 250px; /* Smaller height */
+    max-width: 100%;
+}
+
+/* Automatic color classes */
+.attendance-low { color: #dc3545; }     /* RED <= 50% */
+.attendance-medium { color: #fd7e14; }  /* ORANGE 51-75% */
+.attendance-good { color: #20c997; }    /* LIGHT GREEN 76-89% */
+.attendance-high { color: #198754; }    /* GREEN >= 90% */

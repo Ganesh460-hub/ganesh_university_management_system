@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mark Attendance</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h2>Mark Attendance</h2>
+
+<form th:action="@{/teacher/attendance}" method="post">
+    <input type="hidden" id="teacherEmployeeId" th:value="${teacher.employeeId}">
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+        <tr>
+            <th>Roll No</th>
+            <th>Name</th>
+            <th>Present</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Loop through students -->
+        <tr th:each="student : ${students}">
+            <td th:text="${student.rollNo}"></td>
+            <td th:text="${student.name}"></td>
+            <td>
+                <input type="checkbox"
+                       th:name="'attendance[' + ${student.id} + ']'"
+                       value="true"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <button type="submit">Submit Attendance</button>
+</form>
+
+</body>
+</html>

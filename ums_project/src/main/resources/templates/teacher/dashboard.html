@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    .teacher-dashboard {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Card container */
+    .teacher-dashboard .dashboard-card {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    /* Profile photo */
+    .teacher-dashboard .col-md-3 img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #3f87a6;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .teacher-dashboard .col-md-3 img:hover {
+        transform: scale(1.05);
+    }
+
+    /* Field labels and values */
+    .teacher-dashboard .field-label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .teacher-dashboard .field-value {
+        padding: 8px 12px;
+        background: #f1f3f5;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    /* Menu dropdown */
+    .menu-dropdown {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+
+    .menu-btn {
+        background-color: #3f87a6;
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        font-size: 18px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .menu-content {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        min-width: 180px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        z-index: 1;
+        margin-top: 5px;
+    }
+
+    .menu-content a {
+        display: block;
+        padding: 10px 15px;
+        text-decoration: none;
+        color: #3f87a6;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .menu-content a:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Logout button */
+    .teacher-dashboard .btn-danger {
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transition: all 0.2s;
+    }
+
+    .teacher-dashboard .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body class="teacher-dashboard">
+
+<div class="container">
+  <div class="dashboard-card">
+
+    <div class="row align-items-center mb-4">
+      <div class="col-md-9">
+        <!-- Dropdown Menu -->
+        <div class="menu-dropdown">
+          <button class="menu-btn"><i class="fas fa-bars"></i></button>
+          <div class="menu-content">
+            <a th:href="@{/teacher/attendance}">Mark Attendance</a>
+            <a th:href="@{/teacher/attendance/summary}">Attendance Summary</a>
+            <a th:href="@{/teacher/attendance/history}">Edit Attendance</a>
+            <a th:href="@{/teacher/subject-results}">Post Results</a>
+          </div>
+        </div>
+
+        <h2 class="fw-bold" th:text="${teacher.name}">Teacher Name</h2>
+        <p class="text-muted">Employee ID: <span th:text="${teacher.employeeId}">T1001</span></p>
+      </div>
+
+      <div class="col-md-3 text-end">
+        <form th:action="@{/teacher/upload-photo}" method="post" enctype="multipart/form-data">
+          <label for="photo">
+            <img th:if="${teacher.photo != null}" th:src="@{'/uploads/' + ${teacher.photo}}" alt="Profile Photo">
+            <img th:if="${teacher.photo == null}" th:src="@{/uploads/default-profile.png}" alt="Default Photo">
+          </label>
+          <input type="file" id="photo" name="photo" accept="image/*" style="display:none;" onchange="this.form.submit()">
+        </form>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <p class="field-label">Email</p>
+        <div class="field-value" th:text="${teacher.email}">teacher@example.com</div>
+      </div>
+      <div class="col-md-6">
+        <p class="field-label">Department</p>
+        <div class="field-value" th:text="${teacher.department}">ECE</div>
+      </div>
+      <div class="col-md-6">
+        <p class="field-label">Position</p>
+        <div class="field-value" th:text="${teacher.position} ?: 'Not specified'">Associate Professor</div>
+      </div>
+      <div class="col-md-6">
+        <p class="field-label">Subject</p>
+        <div class="field-value" th:text="${teacher.subject} ?: 'Not specified'">Mathematics</div>
+      </div>
+      <div class="col-md-6">
+        <p class="field-label">Qualification</p>
+        <div class="field-value" th:text="${teacher.highestQualification} ?: 'Not specified'">PhD</div>
+      </div>
+      <div class="col-md-6">
+        <p class="field-label">Phone</p>
+        <div class="field-value" th:text="${teacher.phoneNumber} ?: 'Not specified'">9876543210</div>
+      </div>
+      <div class="col-md-12">
+        <p class="field-label">Address</p>
+        <div class="field-value" th:text="${teacher.completeAddress} ?: 'Not specified'">Hyderabad</div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <a href="/logout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Your existing teacher-dashboard.js -->
+<script th:src="@{/js/teacher-dashboard.js}"></script>
+
+</body>
+</html>

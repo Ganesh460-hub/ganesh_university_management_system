@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+
+<div class="attendance-container">
+    <h2 class="attendance-title">Attendance Dashboard</h2>
+
+    <div class="chart-wrapper">
+        <canvas id="attendanceChart"></canvas>
+    </div>
+
+    <!-- Overall Attendance with Auto Color -->
+    <p class="overall-attendance">
+        <span data-attendance-percentage="${overallAttendance}"
+              th:attr="data-attendance-percentage=${overallAttendance}"
+              th:text="'Overall Attendance: ' + ${#numbers.formatDecimal(overallAttendance, 1, 1)} + '%'">
+            Overall Attendance: 0%
+        </span>
+    </p>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const monthlyData = /*[[${monthlyAttendance}]]*/ {};
+    const labels = Object.keys(monthlyData);
+    const data = Object.values(monthlyData);
+
+    // Function to get color based on percentage
+    function getAttendanceColor(percentage) {
+        if (percentage <= 50) return 'rgba(220, 53, 69, 0.7)';      // RED
+        else if (percentage <= 75) return 'rgba(253, 126, 20, 0.7)'; // ORANGE
+        else if (percentage >= 90) return 'rgba(25, 135, 84, 0.7)';  // GREEN
+        else return 'rgba(32, 201, 151, 0.7)';                       // LIGHT GREEN
+    }
+
+    // Create dynamic background colors
+    const backgroundColors = data.map(percentage => getAttendanceColor(percentage));
+
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Attendance %',
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: 'rgba(0,0,0,0.3)',
+                borderWidth: 1,
+                borderRadius: 5,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) { return value + '%'; }
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Auto-color the overall attendance text
+    document.addEventListener('DOMContentLoaded', function() {
+        const attendanceElements = document.querySelectorAll('[data-attendance-percentage]');
+
+        attendanceElements.forEach(element => {
+            const percentage = parseFloat(element.getAttribute('data-attendance-percentage'));
+            let colorClass = '';
+
+            if (percentage <= 50) colorClass = 'attendance-low';
+            else if (percentage <= 75) colorClass = 'attendance-medium';
+            else if (percentage >= 90) colorClass = 'attendance-high';
+            else colorClass = 'attendance-good';
+
+            element.classList.add(colorClass);
+        });
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

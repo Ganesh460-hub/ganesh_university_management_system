@@ -1,0 +1,115 @@
+/* Scope everything to teacher dashboard */
+.teacher-dashboard {
+    background-color: #f8f9fa;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card container */
+.teacher-dashboard .dashboard-card {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+/* Profile photo */
+/* Profile photo - square shape */
+.teacher-dashboard .col-md-3 img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;  /* small rounded corners for clean square */
+    border: 2px solid #3f87a6;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.teacher-dashboard .col-md-3 img:hover {
+    transform: scale(1.05);
+}
+
+
+/* Field labels and values */
+.teacher-dashboard .field-label {
+    font-weight: 600;
+    color: #555;
+}
+
+.teacher-dashboard .field-value {
+    padding: 8px 12px;
+    background: #f1f3f5;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Menu links as buttons */
+.teacher-dashboard .menu-links a {
+    display: inline-block;
+    background: #3f87a6;
+    color: #fff;
+    padding: 12px 20px;
+    margin-right: 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.teacher-dashboard .menu-links a:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Logout button */
+.teacher-dashboard .btn-danger {
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.teacher-dashboard .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.menu-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.menu-btn {
+    background-color: #3f87a6;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    font-size: 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.menu-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 180px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 1;
+    margin-top: 5px;
+}
+
+.menu-content a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #3f87a6;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.menu-content a:hover {
+    background-color: #f1f1f1;
+}

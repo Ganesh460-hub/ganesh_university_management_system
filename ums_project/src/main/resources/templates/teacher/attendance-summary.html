@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Summary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .category-card {
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .excellent-card {
+            border-left: 5px solid #28a745;
+            background-color: #f8fff9;
+        }
+        .good-card {
+            border-left: 5px solid #17a2b8;
+            background-color: #f0f9ff;
+        }
+        .average-card {
+            border-left: 5px solid #ffc107;
+            background-color: #fffbf0;
+        }
+        .poor-card {
+            border-left: 5px solid #dc3545;
+            background-color: #fff5f5;
+        }
+        .no-data-card {
+            border-left: 5px solid #6c757d;
+            background-color: #f8f9fa;
+        }
+        .percentage-badge {
+            font-size: 0.9em;
+            padding: 5px 10px;
+        }
+        .student-count {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-chart-pie me-2"></i>
+            Student Attendance Summary
+        </h2>
+        <div>
+            <a th:href="@{/teacher/attendance/history}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-history"></i> Attendance History
+            </a>
+            <a th:href="@{/teacher/dashboard}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3" th:each="category : ${attendanceSummary}">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${categoryLabels.get(category.key)}">Category</h5>
+                    <h2 class="text-primary" th:text="${#lists.size(category.value)}">0</h2>
+                    <p class="text-muted">Students</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Sections - SIMPLE APPROACH -->
+    <div th:each="category : ${attendanceSummary}">
+        <!-- Excellent Category -->
+        <div th:if="${category.key == 'excellent'}" class="card category-card excellent-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-star text-success me-2"></i>
+                    Excellent (85-100%)
+                    <small class="student-count ms-2">(<span th:text="${#lists.size(category.value)}">0</span> students)</small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(category.value)}" class="text-center text-muted py-3">
+                    <i class="fas fa-info-circle me-2"></i>No students in this category
+                </div>
+                <table th:unless="${#lists.isEmpty(category.value)}" class="table table-hover">
+                    <thead class="table-light"><tr><th>Student ID</th><th>Name</th><th>Attendance %</th><th>Present</th><th>Total Classes</th></tr></thead>
+                    <tbody>
+                    <tr th:each="student : ${category.value}">
+                        <td th:text="${student.collegeId}"></td>
+                        <td th:text="${student.name}"></td>
+                        <td><span class="badge bg-success percentage-badge" th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 1)} + '%'">0%</span></td>
+                        <td th:text="${student.presentClasses}">0</td>
+                        <td th:text="${student.totalClasses}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Good Category -->
+        <div th:if="${category.key == 'good'}" class="card category-card good-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-thumbs-up text-info me-2"></i>
+                    Good (75-84%)
+                    <small class="student-count ms-2">(<span th:text="${#lists.size(category.value)}">0</span> students)</small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(category.value)}" class="text-center text-muted py-3">
+                    <i class="fas fa-info-circle me-2"></i>No students in this category
+                </div>
+                <table th:unless="${#lists.isEmpty(category.value)}" class="table table-hover">
+                    <thead class="table-light"><tr><th>Student ID</th><th>Name</th><th>Attendance %</th><th>Present</th><th>Total Classes</th></tr></thead>
+                    <tbody>
+                    <tr th:each="student : ${category.value}">
+                        <td th:text="${student.collegeId}"></td>
+                        <td th:text="${student.name}"></td>
+                        <td><span class="badge bg-info percentage-badge" th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 1)} + '%'">0%</span></td>
+                        <td th:text="${student.presentClasses}">0</td>
+                        <td th:text="${student.totalClasses}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Average Category -->
+        <div th:if="${category.key == 'average'}" class="card category-card average-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line text-warning me-2"></i>
+                    Average (60-74%)
+                    <small class="student-count ms-2">(<span th:text="${#lists.size(category.value)}">0</span> students)</small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(category.value)}" class="text-center text-muted py-3">
+                    <i class="fas fa-info-circle me-2"></i>No students in this category
+                </div>
+                <table th:unless="${#lists.isEmpty(category.value)}" class="table table-hover">
+                    <thead class="table-light"><tr><th>Student ID</th><th>Name</th><th>Attendance %</th><th>Present</th><th>Total Classes</th></tr></thead>
+                    <tbody>
+                    <tr th:each="student : ${category.value}">
+                        <td th:text="${student.collegeId}"></td>
+                        <td th:text="${student.name}"></td>
+                        <td><span class="badge bg-warning percentage-badge" th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 1)} + '%'">0%</span></td>
+                        <td th:text="${student.presentClasses}">0</td>
+                        <td th:text="${student.totalClasses}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Poor Category -->
+        <div th:if="${category.key == 'poor'}" class="card category-card poor-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                    Needs Improvement (Below 60%)
+                    <small class="student-count ms-2">(<span th:text="${#lists.size(category.value)}">0</span> students)</small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(category.value)}" class="text-center text-muted py-3">
+                    <i class="fas fa-info-circle me-2"></i>No students in this category
+                </div>
+                <table th:unless="${#lists.isEmpty(category.value)}" class="table table-hover">
+                    <thead class="table-light"><tr><th>Student ID</th><th>Name</th><th>Attendance %</th><th>Present</th><th>Total Classes</th></tr></thead>
+                    <tbody>
+                    <tr th:each="student : ${category.value}">
+                        <td th:text="${student.collegeId}"></td>
+                        <td th:text="${student.name}"></td>
+                        <td><span class="badge bg-danger percentage-badge" th:text="${#numbers.formatDecimal(student.attendancePercentage, 1, 1)} + '%'">0%</span></td>
+                        <td th:text="${student.presentClasses}">0</td>
+                        <td th:text="${student.totalClasses}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- No Data Category -->
+        <div th:if="${category.key == 'noData'}" class="card category-card no-data-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle text-secondary me-2"></i>
+                    No Attendance Data
+                    <small class="student-count ms-2">(<span th:text="${#lists.size(category.value)}">0</span> students)</small>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(category.value)}" class="text-center text-muted py-3">
+                    <i class="fas fa-info-circle me-2"></i>No students in this category
+                </div>
+                <table th:unless="${#lists.isEmpty(category.value)}" class="table table-hover">
+                    <thead class="table-light"><tr><th>Student ID</th><th>Name</th><th>Attendance %</th><th>Present</th><th>Total Classes</th></tr></thead>
+                    <tbody>
+                    <tr th:each="student : ${category.value}">
+                        <td th:text="${student.collegeId}"></td>
+                        <td th:text="${student.name}"></td>
+                        <td><span class="badge bg-secondary percentage-badge">No Data</span></td>
+                        <td th:text="${student.presentClasses}">0</td>
+                        <td th:text="${student.totalClasses}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

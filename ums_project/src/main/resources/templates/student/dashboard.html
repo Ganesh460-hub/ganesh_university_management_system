@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .profile-card {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .profile-photo img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #3f87a6;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .field-value {
+            padding: 8px 12px;
+            background: #f1f3f5;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .feature-box {
+            background: #3f87a6;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        a.feature-link {
+            text-decoration: none;
+            color: white;
+        }
+
+        /* FAB Menu Styles */
+        .fab-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .fab-main {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #3f87a6;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .fab-options {
+            display: none;
+            flex-direction: column;
+            margin-top: 5px;
+        }
+
+        .fab-options.show {
+            display: flex;
+        }
+
+        .fab-options a {
+            display: block;
+            margin-bottom: 5px;
+            background-color: #3f87a6;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .fab-options a:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Profile photo hover effect */
+        img.profile-clickable {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        img.profile-clickable:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="profile-card">
+
+        <!-- Menu Bar at top-left of the card -->
+        <div class="fab-menu">
+            <button class="fab-main" id="fabBtn"><i class="fas fa-bars"></i></button>
+            <div class="fab-options" id="fabOptions">
+                <a th:href="@{/student/fees}" class="fab-option"><i class="fas fa-coins"></i> Pay Fees</a>
+                <a th:href="@{/student/attendance}" class="fab-option"><i class="fas fa-calendar-check"></i> Attendance</a>
+                <a th:href="@{/student/results}" class="fab-option"><i class="fas fa-chart-line"></i> Results</a>
+                <a th:href="@{/student/feedback}" class="fab-option"><i class="fas fa-comment-dots"></i> Feedback</a>
+            </div>
+        </div>
+
+        <div class="row align-items-center mb-4">
+            <div class="col-md-9">
+                <h2 class="fw-bold" th:text="${student.name}">Student Name</h2>
+                <p class="text-muted">College ID: <span th:text="${student.collegeId}">S1001</span></p>
+            </div>
+            <div class="col-md-3 text-end">
+                <form th:action="@{/student/uploadPhoto}" method="post" enctype="multipart/form-data">
+                    <label for="photo" style="cursor:pointer;">
+                        <img th:if="${student.photo != null}" th:src="@{'/uploads/' + ${student.photo}}"
+                             alt="Profile Photo"
+                             class="profile-clickable"
+                             style="width:120px; height:120px; object-fit:cover; border:2px solid #3f87a6; border-radius:8px;">
+                        <img th:if="${student.photo == null}" th:src="@{/uploads/default-profile.png}"
+                             alt="Default Profile Photo"
+                             style="width:120px; height:120px; object-fit:cover; border:2px solid #3f87a6; border-radius:8px;">
+                    </label>
+                    <input type="file" id="photo" name="photo" accept="image/*" style="display:none;" onchange="this.form.submit()">
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <p class="field-label">Email</p>
+                <div class="field-value" th:text="${student.email}">ganesh@example.com</div>
+            </div>
+            <div class="col-md-6">
+                <p class="field-label">Department</p>
+                <div class="field-value" th:text="${student.department}">CSE</div>
+            </div>
+            <div class="col-md-6">
+                <p class="field-label">Blood Group</p>
+                <div class="field-value" th:text="${student.bloodGroup} ?: 'Not specified'">O+</div>
+            </div>
+            <div class="col-md-6">
+                <p class="field-label">Caste</p>
+                <div class="field-value" th:text="${student.caste} ?: 'Not specified'">OC</div>
+            </div>
+            <div class="col-md-6">
+                <p class="field-label">Scholarship Type</p>
+                <div class="field-value">
+                    <span th:if="${student.scholarshipType}" th:text="${student.scholarshipType}" class="badge bg-info"></span>
+                    <span th:unless="${student.scholarshipType}" class="text-muted">Not specified</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <p class="field-label">Parent/Guardian</p>
+                <div class="field-value" th:text="${student.parentOrGuardianName} ?: 'Not specified'">Mr & Mrs Nalla</div>
+            </div>
+            <div class="col-md-12">
+                <p class="field-label">Address</p>
+                <div class="field-value" th:text="${student.completeAddress} ?: 'Not specified'">Hyderabad</div>
+            </div>
+            <div class="col-md-6">
+                <p class="field-label">Parent Phone</p>
+                <div class="field-value" th:text="${student.parentOrGuardianPhone} ?: 'Not specified'">9876543210</div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <a href="/logout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Your existing dashboard.js -->
+<script th:src="@{/js/dashboard.js}"></script>
+
+</body>
+</html>
