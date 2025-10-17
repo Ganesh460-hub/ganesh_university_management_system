@@ -1,0 +1,6 @@
+# railway.toml
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "java -jar target/*.jar"
