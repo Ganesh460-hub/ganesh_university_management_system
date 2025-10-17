@@ -1,5 +1,6 @@
 [build]
 builder = "nixpacks"
+buildPath = "ums_project"
 
 [deploy]
 startCommand = "java -jar target/*.jar"
