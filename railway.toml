@@ -1,6 +1,8 @@
+# Update railway.toml with different build settings
+@"
 [build]
 builder = "nixpacks"
-buildPath = "ums_project"
 
 [deploy]
-startCommand = "java -jar target/*.jar"
+startCommand = "cd ums_project && java -jar target/*.jar"
+"@ | Out-File -FilePath "railway.toml" -Encoding utf8
