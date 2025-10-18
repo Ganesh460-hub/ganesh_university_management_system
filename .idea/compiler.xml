@@ -8,12 +8,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ums_project" />
+        <module name="ums_project (1)" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ums_project" options="-parameters" />
+      <module name="ums_project (1)" options="-parameters" />
     </option>
   </component>
 </project>
